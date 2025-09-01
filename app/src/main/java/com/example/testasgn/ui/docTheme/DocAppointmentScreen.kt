@@ -82,7 +82,7 @@ fun AppointmentScreen(
 
             OutlinedTextField(
                 value = selectedDate,
-                onValueChange = { selectedDate = it },
+                onValueChange = { viewModel.updateDate(it) },
                 label = { Text("Date") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
