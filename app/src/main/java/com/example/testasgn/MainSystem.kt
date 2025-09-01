@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +42,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.example.testasgn.ui.SignUpInfoScreen
 import com.example.testasgn.ui.SignUpPwdScreen
+import com.example.testasgn.ui.SignUpSuccessScreen
 import com.example.testasgn.ui.viewModel.AccViewModel
 import com.example.testasgn.ui.docTheme.DocHomeScreen
 import com.example.testasgn.ui.docTheme.DocPatientsScreen
@@ -60,6 +62,7 @@ enum class AppScreen {
     //SignUp
     SignUpInfo,
     SignUpPwd,
+    SignUpSuccess,
 
     //Login
     UserLogin,
@@ -166,6 +169,7 @@ fun TopBarScreen(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediConnectApp(
     modifier: Modifier = Modifier,
@@ -402,20 +406,43 @@ fun MediConnectApp(
                         newPwd = newPwd,
                         onChangeNewPwd = {newPwd = it},
                         confirmPwd = confirmPwd,
-                        onChangeConfirmPwd = {confirmPwd = it},
+                        onChangeConfirmPwd = {
+                            confirmPwd = it
+                            if (errorMessage?.contains("Passwords do not match") == true) {
+                                errorMessage = null
+                            }
+                                             },
+                        errorMessage = errorMessage,
                         onBackClick = {
                             navController.navigate(AppScreen.SignUpInfo.name)
                                       },
                         onConfirmClick = {
                             errorMessage = null
                             if (newPwd != confirmPwd) {
+                                confirmPwd = ""
                                 errorMessage = "Passwords do not match"
                             }
                             else {
-
+                                signUpViewModel.setPwd(newPwd)
+                                val updateState = signUpUiState.copy(pwd = newPwd)
+                                accViewModel.userSignUp(updateState) { success, message ->
+                                    if (success) {
+                                        navController.navigate(AppScreen.SignUpSuccess.name)
+                                    } else {
+                                        errorMessage = message
+                                    }
+                                }
                             }
 
                         }
+                    )
+                }
+
+                composable(route = AppScreen.SignUpSuccess.name) {
+                    SignUpSuccessScreen(
+                        modifier = modifier
+                            .fillMaxSize(),
+                        onBackClick = { navController.navigate(AppScreen.LoginSystem.name) }
                     )
                 }
             }
@@ -471,4 +498,5 @@ fun MediConnectApp(
         }
     }
 }
+
 

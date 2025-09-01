@@ -3,19 +3,29 @@ package com.example.testasgn.ui
 import com.example.testasgn.R
 import android.content.res.Configuration
 import android.util.Patterns
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -32,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +59,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.testasgn.ui.theme.ArimaTypography
 import com.example.testasgn.ui.theme.TestAsgnTheme
 
 @Composable
@@ -413,7 +425,8 @@ fun SignUpPwdScreen(
     confirmPwd: String,
     onChangeConfirmPwd: (String) -> Unit,
     onBackClick: () -> Unit,
-    onConfirmClick: () -> Unit
+    onConfirmClick: () -> Unit,
+    errorMessage: String?
 ) {
     var calcProgress by remember(newPwd) { mutableFloatStateOf(0f) }
 
@@ -475,13 +488,22 @@ fun SignUpPwdScreen(
 
             EditConfirmPwdTextField(
                 confirmPwd = confirmPwd,
-                onChangeConfirmPwd = onChangeConfirmPwd
+                onChangeConfirmPwd = onChangeConfirmPwd,
+                errorMessage = errorMessage
             )
 
             Spacer(
                 modifier = Modifier
                     .height(200.dp)
             )
+
+            if (errorMessage != "Passwords do not match" && errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    style = ArimaTypography.displaySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
 
             Row(
                 modifier = Modifier
@@ -525,6 +547,7 @@ fun SignUpPwdScreen(
 fun EditConfirmPwdTextField(
     modifier: Modifier = Modifier,
     confirmPwd: String,
+    errorMessage: String?,
     onChangeConfirmPwd: (String) -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
@@ -535,6 +558,15 @@ fun EditConfirmPwdTextField(
         singleLine = true,
         visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         shape = RoundedCornerShape(8.dp),
+        isError = errorMessage?.contains("Passwords do not match") == true,
+        supportingText = {
+            if (errorMessage?.contains("Passwords do not match") == true) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
         trailingIcon = {
             val image = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
             val description = if (passwordVisible) "Hide password" else "Show password"
@@ -686,6 +718,107 @@ fun EditNewPwdTextField(
     )
 }
 
+@Composable
+fun SignUpSuccessScreen(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit
+) {
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = scaleIn(
+                animationSpec = tween(500)
+            ) + fadeIn(animationSpec = tween(500))
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .background(color = Color(0xFF4CAF50), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = "Check",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(5.dp)
+                )
+            }
+        }
+
+
+        Spacer(
+            modifier = Modifier
+                .height(20.dp)
+        )
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(animationSpec = tween(700, delayMillis = 200))
+        ) {
+            Text(
+                text = "Sign Up Success",
+                fontSize = 40.sp,
+                style = ArimaTypography.displayMedium,
+                color = if(isSystemInDarkTheme()) Color.White else Color.Black
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(animationSpec = tween(900, delayMillis = 200))
+        ) {
+            Text(
+                text = "You Can Login Now",
+                fontSize = 20.sp,
+                style = ArimaTypography.displaySmall,
+                color = if(isSystemInDarkTheme()) Color.White else Color.Black
+            )
+        }
+
+        Spacer(
+            modifier = Modifier
+                .height(20.dp)
+        )
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(animationSpec = tween(1000, delayMillis = 400))
+        ) {
+            Button(
+                onClick = onBackClick
+            ) {
+                Text("Continue")
+            }
+        }
+
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun SignUpSuccessScreenPreview() {
+    TestAsgnTheme {
+        SignUpSuccessScreen(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            onBackClick = {}
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SignUpPwdScreenPreview() {
@@ -696,7 +829,8 @@ fun SignUpPwdScreenPreview() {
             confirmPwd = "",
             onChangeConfirmPwd = {},
             onBackClick = {},
-            onConfirmClick = {}
+            onConfirmClick = {},
+            errorMessage = null
         )
     }
 }
@@ -713,7 +847,8 @@ fun SignUpPwdScreenPreviewDark() {
             confirmPwd = "",
             onChangeConfirmPwd = {},
             onBackClick = {},
-            onConfirmClick = {}
+            onConfirmClick = {},
+            errorMessage = null
         )
     }
 }

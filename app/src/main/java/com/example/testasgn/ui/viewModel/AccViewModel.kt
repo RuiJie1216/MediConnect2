@@ -43,46 +43,26 @@ class AccViewModel: ViewModel() {
     }
 
     fun userSignUp(signUpUiState: SignUpUiState, onResult: (Boolean, String) -> Unit) {
-        db.collection("users")
-            .whereEqualTo("ic", signUpUiState.ic)
-            .get()
-            .addOnSuccessListener { icSnapshot ->
-                if (!icSnapshot.isEmpty) {
-                    onResult(false, "Error: IC already exists")
-                    return@addOnSuccessListener
-                }
-
-                db.collection("users")
-                    .whereEqualTo("email", signUpUiState.email)
-                    .get()
-                    .addOnSuccessListener { emailSnapshot ->
-                        if (!emailSnapshot.isEmpty) {
-                            onResult(false, "Error: Email already exists")
-                            return@addOnSuccessListener
+        auth.createUserWithEmailAndPassword(signUpUiState.email, signUpUiState.pwd)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userMap = mapOf(
+                        "ic" to signUpUiState.ic,
+                        "name" to signUpUiState.name,
+                        "email" to signUpUiState.email,
+                        "phone" to signUpUiState.phone
+                    )
+                    db.collection("users").document()
+                        .set(userMap)
+                        .addOnSuccessListener {
+                            onResult(true, "Sign up successfully")
                         }
-
-                        auth.createUserWithEmailAndPassword(signUpUiState.email, signUpUiState.pwd)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    val userMap = mapOf(
-                                        "ic" to signUpUiState.ic,
-                                        "name" to signUpUiState.name,
-                                        "email" to signUpUiState.email,
-                                        "phone" to signUpUiState.phone
-                                    )
-                                    db.collection("users").document()
-                                        .set(userMap)
-                                        .addOnSuccessListener {
-                                            onResult(true, "Sign up successfully")
-                                        }
-                                        .addOnFailureListener { exception ->
-                                            onResult(false, "Error: ${exception.message}")
-                                        }
-                                } else {
-                                    onResult(false, "Error: ${task.exception?.message}")
-                                }
-                            }
-                    }
+                        .addOnFailureListener { exception ->
+                            onResult(false, "Error: ${exception.message}")
+                        }
+                } else {
+                    onResult(false, "Error: ${task.exception?.message}")
+                }
             }
     }
 
