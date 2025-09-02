@@ -47,7 +47,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppointmentScreen(
-    doctorId: String,
+    doctorId: String, //看要login id or doctor id
     viewModel: AppointmentViewModel = viewModel(),
     onConsultationClick: () -> Unit
 ) {
@@ -56,7 +56,7 @@ fun AppointmentScreen(
 
     var selectedDate by remember { mutableStateOf(today) }
 
-    val appointments by viewModel.getAppointments(doctorId).collectAsState()
+    val appointments by viewModel.getAppointments(doctorId).collectAsState() //same
 
     Scaffold(
         topBar = {
