@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Doctor(
-    @PrimaryKey val doctorId: String,
+    @PrimaryKey val doctorId: String = "",
     val loginId: String,
-    val pwd: String,
     val docName: String = "",
     val docDegree: String = "",
     val docSpecialty: String = "",

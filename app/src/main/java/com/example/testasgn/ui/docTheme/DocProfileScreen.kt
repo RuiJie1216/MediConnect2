@@ -30,19 +30,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.testasgn.ui.data.model.Doctor
+import com.example.testasgn.ui.viewModel.AccViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    doctor: Doctor,
+    viewModel: AccViewModel,
     onBackClick: () -> Unit = {},
     onEditClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
+    val doctor = viewModel.currentDoctor
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -68,6 +69,7 @@ fun ProfileScreen(
             )
         }
     ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -82,34 +84,38 @@ fun ProfileScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = doctor.docName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            ProfileDetailItem(label = "Degrees", value = doctor.docDegree)
-            ProfileDetailItem(label = "Specialty", value = doctor.docSpecialty)
-            ProfileDetailItem(label = "Years of Practice", value = "${doctor.yearOfPractice} years")
-            ProfileDetailItem(label = "Languages Spoken", value = doctor.language)
-            ProfileDetailItem(label = "Day-Off", value = doctor.dayOff)
-
-            Spacer(Modifier.height(32.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
-                    .padding(16.dp)
-            ) {
+            if (doctor != null) {
                 Text(
-                    text = doctor.quote,
-                    fontSize = 16.sp,
-                    color = Color.DarkGray
+                    text = doctor.docName,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ProfileDetailItem(label = "Degrees", value = doctor.docDegree)
+                ProfileDetailItem(label = "Specialty", value = doctor.docSpecialty)
+                ProfileDetailItem(
+                    label = "Years of Practice",
+                    value = "${doctor.yearOfPractice} years"
+                )
+                ProfileDetailItem(label = "Languages Spoken", value = doctor.language)
+                ProfileDetailItem(label = "Day-Off", value = doctor.dayOff)
+
+                Spacer(Modifier.height(32.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = doctor.quote,
+                        fontSize = 16.sp,
+                        color = Color.DarkGray
+                    )
+                }
             }
         }
     }
@@ -127,30 +133,4 @@ fun ProfileDetailItem(label: String, value: String) {
         Text(text = "$label:")
         Text(text = value, fontWeight = FontWeight.Medium)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-
-    val fakeDoctor = Doctor(
-        doctorId = "D001",
-        loginId = "doc123",
-        pwd = "password",
-        docName = "Dr. Alice Wong",
-        docDegree = "MBBS, MD",
-        docSpecialty = "Cardiology",
-        yearOfPractice = 12,
-        language = "English, Mandarin, Malay",
-        dayOff = "Sunday",
-        quote = "Caring for patients is my lifelong mission."
-    )
-
-    // 直接塞给 ProfileScreen
-    ProfileScreen(
-        doctor = fakeDoctor,
-        onBackClick = {},
-        onEditClick = {},
-        onLogoutClick = {}
-    )
 }

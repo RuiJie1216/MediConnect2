@@ -44,6 +44,7 @@ import com.example.testasgn.ui.SignUpPwdScreen
 import com.example.testasgn.ui.viewModel.AccViewModel
 import com.example.testasgn.ui.docTheme.DocHomeScreen
 import com.example.testasgn.ui.docTheme.DocPatientsScreen
+import com.example.testasgn.ui.docTheme.ProfileScreen
 import com.example.testasgn.ui.loginTheme.DoctorLoginScreen
 import com.example.testasgn.ui.loginTheme.UserLoginScreen
 import com.example.testasgn.ui.theme.BalooTypography
@@ -71,6 +72,7 @@ enum class AppScreen {
     //Doctor
     DocHome,
     DocPatient,
+    DocProfile,
     DocAppointment
 }
 
@@ -431,10 +433,21 @@ fun MediConnectApp(
                         modifier = modifier
                             .fillMaxHeight(),
                         onAppointmentClick = {},
-                        onProfileClick = {},
+                        onProfileClick = {
+                            navController.navigate(AppScreen.DocProfile.name)
+                        },
                         onPatientClick = {
                             navController.navigate(AppScreen.DocPatient.name)
                         }
+                    )
+                }
+                //Doctor Profile
+                composable(route = AppScreen.DocProfile.name) {
+                    ProfileScreen(
+                        viewModel = accViewModel,
+                        onBackClick = {},
+                        onEditClick = {},
+                        onLogoutClick = {}
                     )
                 }
 

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DoctorDao {
-    @Query("SELECT * FROM Doctor WHERE doctorId = :doctorId")
-    fun getDoctorById(doctorId: String): Flow<Doctor?>
+    @Query("SELECT * FROM Doctor WHERE loginId = :loginId LIMIT 1")
+    suspend fun getDoctorByLoginId(loginId: String): Doctor?
+
 }
