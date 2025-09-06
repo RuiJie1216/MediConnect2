@@ -285,7 +285,7 @@ fun EditUserIcTextField(
     Box(
         modifier = if (errorMessage?.contains("IC") == true) {
             modifier.border(width = 2.dp,
-                color = MaterialTheme.colorScheme.error,
+                color = Color(0xFFB3261E),
                 shape = RoundedCornerShape(35.dp)
             )
         } else modifier
@@ -325,9 +325,9 @@ fun EditUserIcTextField(
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
                     cursorColor = Color.Black,
-                    errorCursorColor = MaterialTheme.colorScheme.error,
+                    errorCursorColor = Color(0xFFB3261E),
                     errorContainerColor = Color.Transparent,
-                    errorPlaceholderColor = MaterialTheme.colorScheme.error,
+                    errorPlaceholderColor = Color(0xFFB3261E),
                     errorIndicatorColor = Color.Transparent
 
                 ),
@@ -354,7 +354,7 @@ fun EditUserPwdTextField(
     Box(
         modifier = if (errorMessage?.contains("Error") == true) {
             modifier.border(width = 2.dp,
-                color = MaterialTheme.colorScheme.error,
+                color = Color(0xFFB3261E),
                 shape = RoundedCornerShape(35.dp)
             )
         } else modifier
@@ -396,9 +396,9 @@ fun EditUserPwdTextField(
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
                     cursorColor = Color.Black,
-                    errorCursorColor = MaterialTheme.colorScheme.error,
+                    errorCursorColor = Color(0xFFB3261E),
                     errorContainerColor = Color.Transparent,
-                    errorPlaceholderColor = MaterialTheme.colorScheme.error,
+                    errorPlaceholderColor = Color(0xFFB3261E),
                     errorIndicatorColor = Color.Transparent
 
                 ),

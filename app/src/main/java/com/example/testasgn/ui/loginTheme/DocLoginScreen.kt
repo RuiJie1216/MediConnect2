@@ -243,7 +243,7 @@ fun EditDocIdTextField(
     Box(
         if (errorMessage?.contains("ID") == true) {
             modifier.border(width = 2.dp,
-                color = MaterialTheme.colorScheme.error,
+                color = Color(0xFFB3261E),
                 shape = RoundedCornerShape(35.dp)
             )
         } else modifier
@@ -281,8 +281,9 @@ fun EditDocIdTextField(
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
-                    cursorColor = Color.Black
-
+                    cursorColor = Color.Black,
+                    errorCursorColor = Color(0xFFB3261E),
+                    errorPlaceholderColor = Color(0xFFB3261E)
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
@@ -305,7 +306,7 @@ fun EditDocPwdTextField(
     Box(
         if (errorMessage?.contains("Error") == true) {
             modifier.border(width = 2.dp,
-                color = MaterialTheme.colorScheme.error,
+                color = Color(0xFFB3261E),
                 shape = RoundedCornerShape(35.dp)
             )
         } else modifier
@@ -340,11 +341,13 @@ fun EditDocPwdTextField(
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,    // 聚焦时底线
+                    focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
-                    cursorColor = Color.Black
+                    cursorColor = Color.Black,
+                    errorCursorColor = Color(0xFFB3261E),
+                    errorPlaceholderColor = Color(0xFFB3261E)
 
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),

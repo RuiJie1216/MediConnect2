@@ -1,6 +1,7 @@
 package com.example.testasgn
 
 import android.util.Patterns
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -70,6 +73,9 @@ enum class AppScreen {
 
     //User
     UserHome,
+    UserAppointment,
+    UserProfile,
+    UserMedicalReminder,
 
     //Doctor
     DocHome,
@@ -86,7 +92,7 @@ fun TopBarScreen(
     hasNavigate: (AppScreen) -> Unit
 ) {
     when(currentScreen) {
-        AppScreen.DocHome -> {
+        AppScreen.DocHome, AppScreen.UserHome -> {
             TopAppBar(
                 title = {
                     Row(
@@ -489,7 +495,11 @@ fun MediConnectApp(
                 composable(route = AppScreen.UserHome.name) {
                     UserHomeScreen(
                         modifier = modifier
-                            .fillMaxHeight()
+                            .fillMaxHeight(),
+                        chooseBar = currentScreen,
+                        onAppointmentClick = {},
+                        onProfileClick = {},
+                        onMedicalReminderClick = {}
                     )
                 }
             }

@@ -525,7 +525,7 @@ fun SignUpPwdScreen(
                     onClick = onConfirmClick,
                     modifier = Modifier
                         .width(100.dp),
-                    enabled = newPwd.isNotBlank() && confirmPwd.isNotBlank() && safeProgress >= 0.75f,
+                    enabled = newPwd.isNotBlank() && confirmPwd.isNotBlank() && safeProgress > 0.75f,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isSystemInDarkTheme()) Color(0xFF089A2D) else Color(0xFF34C759),
                         contentColor = Color.White
@@ -592,7 +592,8 @@ fun CheckPwdFormat(
 
     val color = when {
         safeProgress < 0.5f -> Color.Red
-        safeProgress < 0.75f -> Color.Yellow
+        safeProgress < 0.75f -> Color(0xFFFFA500)
+        safeProgress < 1f -> Color.Yellow
         else -> Color.Green
     }
 
