@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -45,6 +47,7 @@ import androidx.navigation.navigation
 import com.example.testasgn.ui.SignUpInfoScreen
 import com.example.testasgn.ui.SignUpPwdScreen
 import com.example.testasgn.ui.data.db.AppDatabase
+import com.example.testasgn.ui.docTheme.AppointmentScreen
 import com.example.testasgn.ui.viewModel.AccViewModel
 import com.example.testasgn.ui.docTheme.DocHomeScreen
 import com.example.testasgn.ui.docTheme.DocPatientsScreen
@@ -76,7 +79,8 @@ enum class AppScreen {
     //Doctor
     DocHome,
     DocPatient,
-    DocProfile
+    DocProfile,
+    DocAppointment
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,6 +165,19 @@ fun TopBarScreen(
                     containerColor = Color.White,
                     titleContentColor = Color.Black,
                     actionIconContentColor = Color.Black
+                )
+            )
+        }
+        AppScreen.DocAppointment -> {
+            TopAppBar(
+                title = { Text(text = "Appointment List",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .padding(8.dp)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF29E6D2),
+                    titleContentColor = Color.White
                 )
             )
         }
@@ -476,6 +493,18 @@ fun MediConnectApp(
                             onBackClick = { navController.popBackStack() },
                             onEditClick = {},
                             onLogoutClick = {}
+                        )
+                    }
+                }
+
+                composable(route = AppScreen.DocAppointment.name) {
+                    val doctor = accViewModel.currentDoctor
+                    doctor?.let {
+                        AppointmentScreen(
+                            doctorId = it.doctorId,
+                            onConsultationClick = { appointmentId ->
+                                navController.navigate("consultation/$appointmentId")
+                            }
                         )
                     }
                 }

@@ -1,11 +1,11 @@
-package com.example.mediconnect.data.dao
+package com.example.testasgn.ui.data.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.mediconnect.data.model.Patient
+import com.example.testasgn.ui.data.model.Patient
 
 @Dao
 interface PatientDao {

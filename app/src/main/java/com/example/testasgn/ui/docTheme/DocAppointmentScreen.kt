@@ -1,5 +1,6 @@
 package com.example.testasgn.ui.docTheme
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,30 +48,17 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppointmentScreen(
-    doctorId: String, //看要login id or doctor id
+    doctorId: String,
     viewModel: AppointmentViewModel = viewModel(),
-    onConsultationClick: () -> Unit
+    onConsultationClick: (String) -> Unit
 ) {
 
-    val today = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-
-    var selectedDate by remember { mutableStateOf(today) }
-
+    val selectedDate by viewModel.selectedDate.collectAsState()
     val appointments by viewModel.getAppointments(doctorId).collectAsState() //same
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(text = "Appointment List",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontSize = 20.sp,
-                    modifier = Modifier
-                        .padding(8.dp)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF29E6D2),
-                    titleContentColor = Color.White
-                )
-            )
+
         }
     ) { padding ->
         Column(
@@ -115,7 +103,7 @@ fun AppointmentScreen(
 fun AppointmentCard(
     appointment: Appointment,
     modifier: Modifier = Modifier,
-    onConsultationClick: () -> Unit) {
+    onConsultationClick: (String) -> Unit) {
     Card(
         modifier = modifier
             .padding(4.dp),
@@ -162,7 +150,7 @@ fun AppointmentCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = onConsultationClick,
+                onClick = { onConsultationClick(appointment.appointmentId) },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
             ) {
                 Text("Check-in", color = Color.White)

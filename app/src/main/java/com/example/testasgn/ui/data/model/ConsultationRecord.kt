@@ -1,4 +1,4 @@
-package com.example.mediconnect.data.model
+package com.example.testasgn.ui.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

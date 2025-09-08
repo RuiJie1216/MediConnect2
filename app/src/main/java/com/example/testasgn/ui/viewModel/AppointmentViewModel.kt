@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testasgn.ui.data.model.Appointment
 import com.example.testasgn.ui.data.repository.AppointmentRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,9 +28,11 @@ class AppointmentViewModel(
         _selectedDate.value = newDate
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointments(doctorId: String): StateFlow<List<Appointment>> {
         return _selectedDate.flatMapLatest { date ->
             repository.getAppointments(doctorId, date)
         }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     }
+
 }

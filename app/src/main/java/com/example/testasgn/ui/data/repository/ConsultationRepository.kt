@@ -1,7 +1,7 @@
-package com.example.mediconnect.data.repository
+package com.example.testasgn.ui.data.repository
 
-import com.example.mediconnect.data.dao.ConsultationDao
-import com.example.mediconnect.data.model.ConsultationRecord
+import com.example.testasgn.ui.data.dao.ConsultationDao
+import com.example.testasgn.ui.data.model.ConsultationRecord
 
 class ConsultationRepository(private val consultationDao: ConsultationDao) {
     suspend fun insertRecord(record: ConsultationRecord) = consultationDao.insertRecord(record)

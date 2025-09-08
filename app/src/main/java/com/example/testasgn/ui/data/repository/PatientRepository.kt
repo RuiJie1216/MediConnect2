@@ -1,7 +1,7 @@
-package com.example.mediconnect.data.repository
+package com.example.testasgn.ui.data.repository
 
-import com.example.mediconnect.data.dao.PatientDao
-import com.example.mediconnect.data.model.Patient
+import com.example.testasgn.ui.data.dao.PatientDao
+import com.example.testasgn.ui.data.model.Patient
 
 class PatientRepository(private val patientDao: PatientDao) {
     suspend fun insertPatient(patient: Patient) = patientDao.insertPatient(patient)
