@@ -1,23 +1,25 @@
 package com.example.testasgn.ui.viewModel
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testasgn.ui.data.SignUpUiState
+import com.example.testasgn.ui.data.dao.DoctorDao
+import com.example.testasgn.ui.data.db.AppDatabase
 import com.example.testasgn.ui.data.model.Doctor
-import com.example.testasgn.ui.data.repository.DoctorRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
-class AccViewModel(
-    private val repo: DoctorRepository
-): ViewModel() {
+class AccViewModel(application: Application) : AndroidViewModel(application) {
+    private val doctorDao: DoctorDao =
+        AppDatabase.getDatabase(application).doctorDao()
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    var currentDoctor by mutableStateOf<Doctor?>(null)
+
 
     fun userCheck(ic: String, email: String, phone: String,onResult: (Boolean, String) -> Unit) {
         db.collection("users")
@@ -123,13 +125,16 @@ class AccViewModel(
             }
     }
 
+    var currentDoctor: Doctor? by mutableStateOf(null)
+        private set
+
     fun docLogin(id: String, inputPwd: String, onResult: (Boolean, String) -> Unit) {
         db.collection("doctors")
-            .whereEqualTo("id", id)
+            .whereEqualTo("doctorId", id)
             .get()
             .addOnSuccessListener { snapshots ->
                 if (snapshots.isEmpty) {
-                    onResult(false, "ID not found")
+                    onResult(false, "ID not found in Firestore")
                     return@addOnSuccessListener
                 }
 
@@ -139,12 +144,16 @@ class AccViewModel(
                 auth.signInWithEmailAndPassword(email, inputPwd)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
+                            // 登录成功后，再去 Room 拿医生
                             viewModelScope.launch {
-                                val doctor = repo.getDoctorByLoginId(id)
-                                currentDoctor = doctor
+                                val doctor = doctorDao.getDoctorById(id)
+                                if (doctor != null) {
+                                    currentDoctor = doctor
+                                    onResult(true, "Login successfully: ${doctor.docName}")
+                                } else {
+                                    onResult(false, "Doctor not found in Room")
+                                }
                             }
-
-                            onResult(true, "Login successfully: ${auth.currentUser?.uid}")
                         } else {
                             onResult(false, "Error: ${task.exception?.message}")
                         }

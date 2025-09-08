@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +44,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.example.testasgn.ui.SignUpInfoScreen
 import com.example.testasgn.ui.SignUpPwdScreen
+import com.example.testasgn.ui.data.db.AppDatabase
 import com.example.testasgn.ui.viewModel.AccViewModel
 import com.example.testasgn.ui.docTheme.DocHomeScreen
 import com.example.testasgn.ui.docTheme.DocPatientsScreen
@@ -72,8 +76,7 @@ enum class AppScreen {
     //Doctor
     DocHome,
     DocPatient,
-    DocProfile,
-    DocAppointment
+    DocProfile
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,6 +138,29 @@ fun TopBarScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF29E6D2)
+                )
+            )
+        }
+        AppScreen.DocProfile -> {
+            TopAppBar(
+                title = { Text("Profile") },
+                navigationIcon = {
+                    IconButton(onClick = {  }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {  }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    }
+                    IconButton(onClick = {  }) {
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    actionIconContentColor = Color.Black
                 )
             )
         }
@@ -443,12 +469,15 @@ fun MediConnectApp(
                 }
                 //Doctor Profile
                 composable(route = AppScreen.DocProfile.name) {
-                    ProfileScreen(
-                        viewModel = accViewModel,
-                        onBackClick = {},
-                        onEditClick = {},
-                        onLogoutClick = {}
-                    )
+                    val doctor = accViewModel.currentDoctor
+                    doctor?.let {
+                        ProfileScreen(
+                            doctor = it,
+                            onBackClick = { navController.popBackStack() },
+                            onEditClick = {},
+                            onLogoutClick = {}
+                        )
+                    }
                 }
 
                 //PatientInfo

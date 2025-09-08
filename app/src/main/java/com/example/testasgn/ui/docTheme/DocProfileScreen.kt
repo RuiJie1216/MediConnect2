@@ -32,92 +32,64 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.testasgn.ui.viewModel.AccViewModel
+import com.example.testasgn.ui.data.model.Doctor
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: AccViewModel,
+    doctor: Doctor,
     onBackClick: () -> Unit = {},
     onEditClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
-    val doctor = viewModel.currentDoctor
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Profile") },
-                navigationIcon = {
-                    IconButton(onClick = { onBackClick() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onEditClick) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
-                    }
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = Color.Black,
-                    actionIconContentColor = Color.Black
-                )
-            )
-        }
-    ) { innerPadding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.AccountCircle,
+            contentDescription = "Doctor Avatar",
+            modifier = Modifier.size(100.dp)
+        )
 
-        Column(
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = doctor.docName,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        ProfileDetailItem(label = "Degrees", value = doctor.docDegree)
+        ProfileDetailItem(label = "Specialty", value = doctor.docSpecialty)
+        ProfileDetailItem(
+            label = "Years of Practice",
+            value = "${doctor.yearOfPractice} years"
+        )
+        ProfileDetailItem(label = "Languages Spoken", value = doctor.language)
+        ProfileDetailItem(label = "Day-Off", value = doctor.dayOff)
+
+        Spacer(Modifier.height(32.dp))
+
+        Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
+                .padding(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Doctor Avatar",
-                modifier = Modifier.size(100.dp)
+            Text(
+                text = doctor.quote,
+                fontSize = 16.sp,
+                color = Color.DarkGray
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            if (doctor != null) {
-                Text(
-                    text = doctor.docName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                ProfileDetailItem(label = "Degrees", value = doctor.docDegree)
-                ProfileDetailItem(label = "Specialty", value = doctor.docSpecialty)
-                ProfileDetailItem(
-                    label = "Years of Practice",
-                    value = "${doctor.yearOfPractice} years"
-                )
-                ProfileDetailItem(label = "Languages Spoken", value = doctor.language)
-                ProfileDetailItem(label = "Day-Off", value = doctor.dayOff)
-
-                Spacer(Modifier.height(32.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = doctor.quote,
-                        fontSize = 16.sp,
-                        color = Color.DarkGray
-                    )
-                }
-            }
         }
+
     }
 }
 
