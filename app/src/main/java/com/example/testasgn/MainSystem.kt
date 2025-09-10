@@ -52,7 +52,10 @@ import com.example.testasgn.ui.docTheme.DocPatientsScreen
 import com.example.testasgn.ui.loginTheme.DoctorLoginScreen
 import com.example.testasgn.ui.loginTheme.UserLoginScreen
 import com.example.testasgn.ui.theme.BalooTypography
+import com.example.testasgn.ui.userTheme.UserAppointmentScreen
 import com.example.testasgn.ui.userTheme.UserHomeScreen
+import com.example.testasgn.ui.userTheme.UserMedicReminderScreen
+import com.example.testasgn.ui.userTheme.UserProfileScreen
 import com.example.testasgn.ui.viewModel.SignUpViewModel
 
 enum class AppScreen {
@@ -497,9 +500,30 @@ fun MediConnectApp(
                         modifier = modifier
                             .fillMaxHeight(),
                         chooseBar = currentScreen,
-                        onAppointmentClick = {},
-                        onProfileClick = {},
-                        onMedicalReminderClick = {}
+                        onAppointmentClick = {navController.navigate(AppScreen.UserAppointment.name)},
+                        onProfileClick = {navController.navigate(AppScreen.UserProfile.name)},
+                        onMedicalReminderClick = {navController.navigate(AppScreen.UserMedicalReminder.name)}
+                    )
+                }
+
+                composable(route = AppScreen.UserProfile.name) {
+                    UserProfileScreen(
+                        modifier = modifier
+                            .fillMaxHeight()
+                    )
+                }
+
+                composable(route = AppScreen.UserAppointment.name) {
+                    UserAppointmentScreen(
+                        modifier = modifier
+                            .fillMaxHeight()
+                    )
+                }
+
+                composable(route = AppScreen.UserMedicalReminder.name) {
+                    UserMedicReminderScreen(
+                        modifier = modifier
+                            .fillMaxHeight()
                     )
                 }
             }
