@@ -1,4 +1,4 @@
-package com.example.testasgn.ui.data.model
+package com.example.testasgn.ui.data.DataTable
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

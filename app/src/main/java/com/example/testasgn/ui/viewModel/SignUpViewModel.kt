@@ -1,7 +1,7 @@
 package com.example.testasgn.ui.viewModel
 
 import androidx.lifecycle.ViewModel
-import com.example.testasgn.ui.data.SignUpUiState
+import com.example.testasgn.ui.data.uiState.SignUpUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

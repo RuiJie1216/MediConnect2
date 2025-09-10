@@ -3,8 +3,8 @@ package com.example.testasgn.ui.viewModel
 import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.testasgn.ui.data.model.Appointment
-import com.example.testasgn.ui.data.repository.AppointmentRepository
+import com.example.testasgn.ui.data.DataTable.Appointment
+import com.example.testasgn.ui.data.repository.AppointmentRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +15,7 @@ import java.util.Date
 import java.util.Locale
 
 class AppointmentViewModel(
-    private val repository: AppointmentRepository
+    private val repository: AppointmentRepo
 ) : ViewModel() {
 
     private val _selectedDate = MutableStateFlow(

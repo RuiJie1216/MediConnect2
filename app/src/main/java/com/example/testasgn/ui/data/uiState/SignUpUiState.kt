@@ -1,4 +1,4 @@
-package com.example.testasgn.ui.data
+package com.example.testasgn.ui.data.uiState
 
 data class SignUpUiState(
     val existPatient: Boolean? = null,
