@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -60,15 +63,18 @@ import com.example.testasgn.ui.database.AppDatabase
 import com.example.testasgn.ui.viewModel.AccViewModel
 import com.example.testasgn.ui.docTheme.DocHomeScreen
 import com.example.testasgn.ui.docTheme.DocPatientsScreen
+import com.example.testasgn.ui.docTheme.DocProfileScreen
 import com.example.testasgn.ui.loginTheme.DoctorLoginScreen
 import com.example.testasgn.ui.loginTheme.UserLoginScreen
 import com.example.testasgn.ui.theme.BalooTypography
 import com.example.testasgn.ui.userTheme.UserAppointmentScreen
 import com.example.testasgn.ui.userTheme.UserHomeScreen
 import com.example.testasgn.ui.userTheme.UserMedicReminderScreen
+import com.example.testasgn.ui.userTheme.UserPersonalInfoScreen
 import com.example.testasgn.ui.userTheme.UserProfileScreen
 import com.example.testasgn.ui.viewModel.MedicalReminderViewModel
 import com.example.testasgn.ui.viewModel.SignUpViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -95,11 +101,14 @@ enum class AppScreen {
     UserAppointment,
     UserProfile,
     UserMedicalReminder,
+    UserPersonalInfo,
 
     //Doctor
     DocHome,
     DocPatient,
-    DocAppointment
+    DocAppointment,
+    DocProfile,
+    DocEditProfile
 }
 
 class AccViewModelFactory(
@@ -134,10 +143,11 @@ fun TopBarScreen(
     currentScreen: AppScreen,
     searchQuery: String,
     onChangeSearchQuery: (String) -> Unit,
-    hasNavigate: (AppScreen) -> Unit
+    hasNavigate: (AppScreen) -> Unit,
+    onDocLogout: () -> Unit
 ) {
     when(currentScreen) {
-        AppScreen.DocHome, AppScreen.UserHome, AppScreen.UserProfile, AppScreen.UserMedicalReminder -> {
+        AppScreen.DocHome, AppScreen.UserHome, AppScreen.UserProfile, AppScreen.UserMedicalReminder, AppScreen.UserPersonalInfo -> {
             TopAppBar(
                 title = {
                     Row(
@@ -156,6 +166,35 @@ fun TopBarScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF00C8B3),
                     titleContentColor = Color.White
+                )
+            )
+        }
+        AppScreen.DocProfile -> {
+            TopAppBar(
+                title = { Text("Profile") },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { hasNavigate(AppScreen.DocHome) }
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { AppScreen.DocEditProfile }
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    }
+                    IconButton(
+                        onClick = onDocLogout
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    actionIconContentColor = Color.Black
                 )
             )
         }
@@ -254,6 +293,13 @@ fun MediConnectApp(
     val currentDoctor by accViewModel.currentDoctor.collectAsState()
     val reminders by medicalViewModel.reminders.collectAsState()
 
+    LaunchedEffect(currentUser) {
+        currentUser?.let { user ->
+            medicalViewModel.loadAllReminders(user.ic)
+
+            medicalViewModel.scheduleAllUserReminders(context)
+        }
+    }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = AppScreen.valueOf(
@@ -261,7 +307,10 @@ fun MediConnectApp(
     )
 
     val signUpUiState by signUpViewModel.signUpUiState.collectAsState()
+
     var searchQuery by remember { mutableStateOf("") }
+    var docLogOutConfirm by rememberSaveable { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = {
@@ -269,7 +318,8 @@ fun MediConnectApp(
                 currentScreen = currentScreen,
                 searchQuery = searchQuery,
                 onChangeSearchQuery = {searchQuery = it},
-                hasNavigate = {navController.navigate(it.name)}
+                hasNavigate = {navController.navigate(it.name)},
+                onDocLogout = {docLogOutConfirm = true}
             )
         }
     ) { innerPadding ->
@@ -536,7 +586,9 @@ fun MediConnectApp(
                         modifier = modifier
                             .fillMaxHeight(),
                         onAppointmentClick = {},
-                        onProfileClick = {},
+                        onProfileClick = {
+                            navController.navigate(AppScreen.DocProfile.name)
+                        },
                         onPatientClick = {
                             navController.navigate(AppScreen.DocPatient.name)
                         }
@@ -554,6 +606,30 @@ fun MediConnectApp(
                         onBackClick = {
                             navController.navigate(AppScreen.DocHome.name)
                         }
+                    )
+                }
+                
+                composable(route = AppScreen.DocProfile.name) {
+                    if (docLogOutConfirm) {
+                        AlertDialog(
+                            onDismissRequest = { docLogOutConfirm = false },
+                            title = { Text("Confirm Logout") },
+                            text = { Text("Are you sure you want to logout?") },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    docLogOutConfirm = false
+                                    navController.navigate(AppScreen.LoginSystem.name)
+                                }) { Text("Yes") }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { docLogOutConfirm = false }) { Text("No") }
+                            }
+                        )
+                    }
+                    DocProfileScreen(
+                        modifier = modifier
+                            .fillMaxHeight(),
+                        doctor = currentDoctor
                     )
                 }
             }
@@ -609,15 +685,13 @@ fun MediConnectApp(
                         onAppointmentClick = {navController.navigate(AppScreen.UserAppointment.name)},
                         onLogoutClick = {
                             logOutConfirm = true
-                        }
+                        },
+                        onPersonalInfoClick = {navController.navigate(AppScreen.UserPersonalInfo.name)}
                     )
                 }
 
                 composable(route = AppScreen.UserAppointment.name) {
-                    UserAppointmentScreen(
-                        modifier = modifier
-                            .fillMaxHeight()
-                    )
+
                 }
 
                 composable(route = AppScreen.UserMedicalReminder.name) {
@@ -644,7 +718,61 @@ fun MediConnectApp(
                         reminders = sortedReminders,
                         currentScreen = currentScreen,
                         onHomeClick = {navController.navigate(AppScreen.UserHome.name)},
-                        onProfileClick = {navController.navigate(AppScreen.UserProfile.name)}
+                        onProfileClick = {navController.navigate(AppScreen.UserProfile.name)},
+                        onAppointmentClick = {navController.navigate(AppScreen.UserAppointment.name)}
+                    )
+                }
+
+                composable(route = AppScreen.UserPersonalInfo.name) {
+                    var name by remember { mutableStateOf(currentUser?.name ?: "") }
+                    var age by remember { mutableStateOf(currentUser?.age?.toString() ?: "") }
+                    var gender by remember { mutableStateOf(currentUser?.gender ?: "") }
+                    var email by remember { mutableStateOf(currentUser?.email ?: "") }
+                    var address by remember { mutableStateOf(currentUser?.address ?: "") }
+                    var phone by remember { mutableStateOf(currentUser?.phone ?: "") }
+                    var medicalHistory by remember { mutableStateOf(currentUser?.medicalHistory ?: "") }
+                    var weight by remember { mutableStateOf(currentUser?.weight?.toString() ?: "") }
+                    var height by remember { mutableStateOf(currentUser?.height?.toString() ?: "") }
+
+                    UserPersonalInfoScreen(
+                        modifier = modifier
+                            .fillMaxHeight(),
+                        name = name,
+                        onChangeName = {name = it},
+                        age = age,
+                        onChangeAge = {age = it},
+                        gender = gender,
+                        onChangeGender = {gender = it},
+                        email = email,
+                        onChangeEmail = {email = it},
+                        phone = phone,
+                        onChangePhone = {phone = it},
+                        address = address,
+                        onChangeAddress = {address = it},
+                        weight = weight,
+                        onChangeWeight = {weight = it},
+                        height = height,
+                        onChangeHeight = {height = it},
+                        medicalHistory = medicalHistory,
+                        onChangeMedicalHistory = {medicalHistory = it},
+                        onSaveClick = {
+                            val updateState = currentUser?.copy(
+                                name = name,
+                                age = age.toIntOrNull() ?: 0,
+                                gender = gender,
+                                email = email,
+                                phone = phone,
+                                address = address,
+                                medicalHistory = medicalHistory,
+                                weight = weight.toDoubleOrNull() ?: 0.0,
+                                height = height.toDoubleOrNull() ?: 0.0
+                            )
+                            updateState?.let {
+                                accViewModel.userUpdate(it)
+                            }
+                            navController.navigate(AppScreen.UserProfile.name)
+                        },
+                        onBackClick = {navController.navigate(AppScreen.UserProfile.name)}
                     )
                 }
             }

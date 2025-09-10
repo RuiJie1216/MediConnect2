@@ -1,4 +1,4 @@
-package com.example.testasgn.ui.data.DataTable
+package com.example.testasgn.ui.data.dataTable
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -30,5 +30,11 @@ data class Users(
     val height: Double = 0.0,
 
     @ColumnInfo(name = "address")
-    val address: String = ""
+    val address: String = "",
+
+    @ColumnInfo(name = "gender")
+    val gender: String = "",
+
+    @ColumnInfo(name = "medicalHistory")
+    val medicalHistory: String = ""
 )

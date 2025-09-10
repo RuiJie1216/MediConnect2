@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.testasgn.ui.data.DataTable.MedicalReminder
+import com.example.testasgn.ui.data.dataTable.MedicalReminder
 
 @Dao
 interface MedicalDao {

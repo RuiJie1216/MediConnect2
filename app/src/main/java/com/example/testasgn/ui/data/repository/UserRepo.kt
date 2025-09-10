@@ -1,7 +1,7 @@
 package com.example.testasgn.ui.data.repository
 
 import com.example.testasgn.ui.data.dao.UserDao
-import com.example.testasgn.ui.data.DataTable.Users
+import com.example.testasgn.ui.data.dataTable.Users
 import kotlinx.coroutines.flow.Flow
 
 class UserRepo(private val userDao: UserDao) {

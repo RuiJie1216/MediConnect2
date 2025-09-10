@@ -3,7 +3,7 @@ package com.example.testasgn.ui.viewModel
 import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.testasgn.ui.data.DataTable.Appointment
+import com.example.testasgn.ui.data.dataTable.Appointment
 import com.example.testasgn.ui.data.repository.AppointmentRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

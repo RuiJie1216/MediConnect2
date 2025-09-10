@@ -2,7 +2,7 @@ package com.example.testasgn.ui.data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.example.testasgn.ui.data.DataTable.Appointment
+import com.example.testasgn.ui.data.dataTable.Appointment
 import kotlinx.coroutines.flow.Flow
 
 @Dao

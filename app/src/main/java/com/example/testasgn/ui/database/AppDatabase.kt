@@ -5,12 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.testasgn.ui.data.DataTable.Doctors
-import com.example.testasgn.ui.data.DataTable.MedicalReminder
+import com.example.testasgn.ui.data.dataTable.Doctors
+import com.example.testasgn.ui.data.dataTable.MedicalReminder
 import com.example.testasgn.ui.data.dao.UserDao
-import com.example.testasgn.ui.data.DataTable.Users
+import com.example.testasgn.ui.data.dataTable.Users
 import com.example.testasgn.ui.data.dao.DoctorDao
 import com.example.testasgn.ui.data.dao.MedicalDao
+import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,35 +37,6 @@ abstract class AppDatabase: RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database"
                 )
-                    .addCallback(object : RoomDatabase.Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
-                            INSTANCE?.let { database ->  // 使用 INSTANCE
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    database.medicalDao().insertReminders(
-                                        listOf(
-                                            MedicalReminder(
-                                                ic = "061010031937",
-                                                name = "Paracetamol",
-                                                dose = 2,
-                                                instruction = "After food",
-                                                time = "09:00 AM",
-                                                date = "2025-09-10"
-                                            ),
-                                            MedicalReminder(
-                                                ic = "061010031937",
-                                                name = "Vitamin C",
-                                                dose = 1,
-                                                instruction = "Before food",
-                                                time = "08:00 PM",
-                                                date = "2025-09-10"
-                                            )
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    })
                     .build()
                 INSTANCE = instance
                 instance

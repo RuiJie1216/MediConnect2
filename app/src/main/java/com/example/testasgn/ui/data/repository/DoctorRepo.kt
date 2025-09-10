@@ -1,6 +1,6 @@
 package com.example.testasgn.ui.data.repository
 
-import com.example.testasgn.ui.data.DataTable.Doctors
+import com.example.testasgn.ui.data.dataTable.Doctors
 import com.example.testasgn.ui.data.dao.DoctorDao
 import kotlinx.coroutines.flow.Flow
 

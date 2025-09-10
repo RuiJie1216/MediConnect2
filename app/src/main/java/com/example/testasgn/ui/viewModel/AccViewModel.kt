@@ -2,14 +2,13 @@ package com.example.testasgn.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.testasgn.ui.data.DataTable.Doctors
+import com.example.testasgn.ui.data.dataTable.Doctors
 import com.example.testasgn.ui.data.uiState.SignUpUiState
-import com.example.testasgn.ui.data.DataTable.Users
+import com.example.testasgn.ui.data.dataTable.Users
 import com.example.testasgn.ui.data.repository.DoctorRepo
 import com.example.testasgn.ui.data.repository.UserRepo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,6 +26,65 @@ class AccViewModel(
     private val _currentDoctor = MutableStateFlow<Doctors?>(null)
     val currentDoctor: StateFlow<Doctors?> = _currentDoctor
 
+    fun syncFirebaseToRoom(onComplete: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                // Step 1: Sync Users
+                db.collection("users").get()
+                    .addOnSuccessListener { snapshot ->
+                        viewModelScope.launch {
+                            snapshot.documents.forEach { doc ->
+                                val user = Users(
+                                    ic = doc.getString("ic") ?: "",
+                                    name = doc.getString("name") ?: "",
+                                    email = doc.getString("email") ?: "",
+                                    phone = doc.getString("phone") ?: "",
+                                    height = doc.getDouble("height") ?: 0.0,
+                                    weight = doc.getDouble("weight") ?: 0.0,
+                                    age = doc.getLong("age")?.toInt() ?: 0,
+                                    address = doc.getString("address") ?: "",
+                                    gender = doc.getString("gender") ?: "",
+                                    medicalHistory = doc.getString("medicalHistory") ?: "-"
+                                )
+                                userRepo.insert(user)
+                            }
+                        }
+                    }
+
+                // Step 2: Sync Doctors
+                db.collection("doctors").get()
+                    .addOnSuccessListener { snapshot ->
+                        viewModelScope.launch {
+                            snapshot.documents.forEach { doc ->
+                                val doctor = Doctors(
+                                    id = doc.getString("id") ?: "",
+                                    name = doc.getString("name") ?: "",
+                                    email = doc.getString("email") ?: "",
+                                    phone = doc.getString("phone") ?: "",
+                                    degree = doc.getString("degree") ?: "",
+                                    specialty = doc.getString("specialty") ?: "",
+                                    year = doc.getLong("year")?.toInt() ?: 0,
+                                    currentHospital = doc.getString("current_hospital") ?: "",
+                                    quote = doc.getString("quote") ?: "",
+                                    language = (doc.get("languages") as? List<*>)?.joinToString(", ") {
+                                        it as? String ?: ""
+                                    } ?: "",
+                                    dayOff = (doc.get("day_off") as? List<*>)?.joinToString(", ") {
+                                        it as? String ?: ""
+                                    } ?: ""
+                                )
+                                doctorRepo.insert(doctor)
+                            }
+                        }
+                    }
+
+                onComplete(true, "Firebase data synced to Room")
+
+            } catch (e: Exception) {
+                onComplete(false, "Error: ${e.message}")
+            }
+        }
+    }
 
     fun userCheck(ic: String, email: String, phone: String,onResult: (Boolean, String) -> Unit) {
         db.collection("users")
@@ -121,7 +179,9 @@ class AccViewModel(
                                 height = userDoc.getDouble("height") ?: 0.0,
                                 weight = userDoc.getDouble("weight") ?: 0.0,
                                 age = userDoc.getLong("age")?.toInt() ?: 0,
-                                address = userDoc.getString("address") ?: ""
+                                address = userDoc.getString("address") ?: "",
+                                gender = userDoc.getString("gender") ?: "",
+                                medicalHistory = userDoc.getString("medicalHistory") ?: ""
                             )
 
                             viewModelScope.launch {
@@ -161,7 +221,14 @@ class AccViewModel(
                                 id = doctorDoc.getString("id") ?: "",
                                 name = doctorDoc.getString("name") ?: "",
                                 email = doctorDoc.getString("email") ?: "",
-                                phone = doctorDoc.getString("phone") ?: ""
+                                phone = doctorDoc.getString("phone") ?: "",
+                                degree = doctorDoc.getString("degree") ?: "",
+                                specialty = doctorDoc.getString("specialty") ?: "",
+                                year = doctorDoc.getLong("year")?.toInt() ?: 0,
+                                currentHospital = doctorDoc.getString("current_hospital") ?: "",
+                                quote = doctorDoc.getString("quote") ?: "",
+                                language = (doctorDoc.get("languages") as? List<*>)?.joinToString(", ") { it as? String ?: "" } ?: "",
+                                dayOff = (doctorDoc.get("day_off") as? List<*>)?.joinToString(", ") { it as? String ?: "" } ?: ""
                             )
 
                             viewModelScope.launch {
@@ -178,5 +245,45 @@ class AccViewModel(
             .addOnFailureListener { exception ->
                 onResult(false, "Error: ${exception.message}")
             }
+    }
+
+    fun userUpdate(user: Users) {
+        viewModelScope.launch {
+            userRepo.update(user)
+            _currentUser.value = user
+
+            db.collection("users")
+                .whereEqualTo("ic", user.ic)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    if (!snapshot.isEmpty) {
+                        val docRef = snapshot.documents[0].reference
+
+                        docRef.update(
+                            mapOf(
+                                "name" to user.name,
+                                "email" to user.email,
+                                "phone" to user.phone,
+                                "age" to user.age,
+                                "address" to user.address,
+                                "gender" to user.gender,
+                                "weight" to user.weight,
+                                "height" to user.height,
+                                "medicalHistory" to user.medicalHistory
+                            )
+                        ).addOnSuccessListener {
+                            println("Firebase update success for IC: ${user.ic}")
+                        }.addOnFailureListener { e ->
+                            println("Firebase update failed: ${e.message}")
+                        }
+                    } else {
+                        println("No user found with IC: ${user.ic}")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    println("Firebase query failed: ${e.message}")
+                }
+
+        }
     }
 }

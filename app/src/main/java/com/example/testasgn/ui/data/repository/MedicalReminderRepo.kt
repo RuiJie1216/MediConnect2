@@ -1,6 +1,6 @@
 package com.example.testasgn.ui.data.repository
 
-import com.example.testasgn.ui.data.DataTable.MedicalReminder
+import com.example.testasgn.ui.data.dataTable.MedicalReminder
 import com.example.testasgn.ui.data.dao.MedicalDao
 
 class MedicalReminderRepo(private val medicalDao: MedicalDao) {
