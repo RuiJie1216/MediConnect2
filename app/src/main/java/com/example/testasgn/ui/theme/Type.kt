@@ -15,6 +15,13 @@ val balooFontType = FontFamily(
     )
 )
 
+val interFontType = FontFamily(
+    Font(
+        R.font.inter_bold,
+        FontWeight.Bold
+    )
+)
+
 val arimaFontType = FontFamily(
     Font(
         R.font.arima_madurai_black,
@@ -35,6 +42,11 @@ val BalooTypography = Typography(
         fontFamily = balooFontType,
         fontWeight = FontWeight.Normal,
         fontSize = 40.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = balooFontType,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp
     )
 )
 
@@ -56,6 +68,15 @@ val ArimaTypography = Typography(
     )
 
 )
+
+val InterTypography = Typography(
+    titleMedium = TextStyle(
+        fontFamily = interFontType,
+        fontWeight = FontWeight.Bold,
+        fontSize = 25.sp
+    )
+)
+
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,

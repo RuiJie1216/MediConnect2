@@ -51,7 +51,7 @@ fun UserChooseBar(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable {  }.weight(1f)
+                modifier = Modifier.clickable { if (chooseBar != AppScreen.UserAppointment) onTurnClick(AppScreen.UserAppointment) }.weight(1f)
             ) {
                 Icon(
                     imageVector = Icons.Default.DateRange,
@@ -69,7 +69,7 @@ fun UserChooseBar(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { }.weight(1f)
+                modifier = Modifier.clickable { if(chooseBar != AppScreen.UserHome) onTurnClick(AppScreen.UserHome) }.weight(1f)
             ) {
                 Icon(
                     imageVector = Icons.Default.Home,
@@ -87,7 +87,7 @@ fun UserChooseBar(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable {}.weight(1f)
+                modifier = Modifier.clickable { if (chooseBar != AppScreen.UserProfile) onTurnClick(AppScreen.UserProfile) }.weight(1f)
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,

@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.kapt") version "2.2.10"
 }
 
 android {
@@ -44,6 +45,13 @@ android {
 
 
 dependencies {
+    // Room main
+    implementation("androidx.room:room-runtime:2.7.2")
+    kapt("androidx.room:room-compiler:2.7.2")
+
+    // Room Kotlin
+    implementation("androidx.room:room-ktx:2.7.2")
+
     implementation(platform("com.google.firebase:firebase-bom:34.2.0")) // Check for the latest version
     // Add the dependencies for the Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies

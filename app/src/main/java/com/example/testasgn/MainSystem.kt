@@ -1,6 +1,8 @@
 package com.example.testasgn
 
+import android.os.Build
 import android.util.Patterns
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -26,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -46,14 +53,26 @@ import androidx.navigation.navigation
 import com.example.testasgn.ui.SignUpInfoScreen
 import com.example.testasgn.ui.SignUpPwdScreen
 import com.example.testasgn.ui.SignUpSuccessScreen
+import com.example.testasgn.ui.data.repository.DoctorRepo
+import com.example.testasgn.ui.data.repository.MedicalReminderRepo
+import com.example.testasgn.ui.data.repository.UserRepo
+import com.example.testasgn.ui.database.AppDatabase
 import com.example.testasgn.ui.viewModel.AccViewModel
 import com.example.testasgn.ui.docTheme.DocHomeScreen
 import com.example.testasgn.ui.docTheme.DocPatientsScreen
 import com.example.testasgn.ui.loginTheme.DoctorLoginScreen
 import com.example.testasgn.ui.loginTheme.UserLoginScreen
 import com.example.testasgn.ui.theme.BalooTypography
+import com.example.testasgn.ui.userTheme.UserAppointmentScreen
 import com.example.testasgn.ui.userTheme.UserHomeScreen
+import com.example.testasgn.ui.userTheme.UserMedicReminderScreen
+import com.example.testasgn.ui.userTheme.UserProfileScreen
+import com.example.testasgn.ui.viewModel.MedicalReminderViewModel
 import com.example.testasgn.ui.viewModel.SignUpViewModel
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 enum class AppScreen {
     //System
@@ -83,6 +102,32 @@ enum class AppScreen {
     DocAppointment
 }
 
+class AccViewModelFactory(
+    private val userRepo: UserRepo,
+    private val doctorRepo: DoctorRepo
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(AccViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return AccViewModel(userRepo, doctorRepo) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class MedicalReminderViewModelFactory(
+    private val medicalReminderRepo: MedicalReminderRepo
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MedicalReminderViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return MedicalReminderViewModel(medicalReminderRepo) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarScreen(
@@ -92,7 +137,7 @@ fun TopBarScreen(
     hasNavigate: (AppScreen) -> Unit
 ) {
     when(currentScreen) {
-        AppScreen.DocHome, AppScreen.UserHome -> {
+        AppScreen.DocHome, AppScreen.UserHome, AppScreen.UserProfile, AppScreen.UserMedicalReminder -> {
             TopAppBar(
                 title = {
                     Row(
@@ -175,14 +220,41 @@ fun TopBarScreen(
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediConnectApp(
     modifier: Modifier = Modifier,
-    accViewModel: AccViewModel = viewModel(),
     signUpViewModel: SignUpViewModel = viewModel(),
     navController: NavHostController = rememberNavController()
 ) {
+    val context = LocalContext.current
+    //database for app
+    val db = remember { AppDatabase.getInstance(context) }
+
+    //repository
+    val userRepo = remember { UserRepo(db.userDao()) }
+    val doctorRepo = remember { DoctorRepo(db.doctorDao()) }
+    val medicalReminderRepo = remember { MedicalReminderRepo(db.medicalDao()) }
+
+    //factory of repo
+    val accFactory = remember { AccViewModelFactory(userRepo, doctorRepo) }
+    val medicalFactory = remember { MedicalReminderViewModelFactory(medicalReminderRepo) }
+
+    //accViewModel
+    val accViewModel: AccViewModel = viewModel(
+        factory = accFactory
+    )
+
+    val medicalViewModel: MedicalReminderViewModel = viewModel(
+        factory = medicalFactory
+    )
+
+    val currentUser by accViewModel.currentUser.collectAsState()
+    val currentDoctor by accViewModel.currentDoctor.collectAsState()
+    val reminders by medicalViewModel.reminders.collectAsState()
+
+
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = AppScreen.valueOf(
         backStackEntry?.destination?.route ?: AppScreen.LoginSystem.name
@@ -217,9 +289,9 @@ fun MediConnectApp(
             ) {
                 //UserLogin
                 composable(route = AppScreen.UserLogin.name) {
-                    var ic by remember { mutableStateOf("") }
-                    var pwd by remember { mutableStateOf("") }
-                    var errorMessage by remember { mutableStateOf<String?>(null) }
+                    var ic by rememberSaveable { mutableStateOf("") }
+                    var pwd by rememberSaveable { mutableStateOf("") }
+                    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
                     UserLoginScreen(
                         modifier = Modifier
@@ -270,9 +342,9 @@ fun MediConnectApp(
 
                 //DoctorLogin
                 composable(route = AppScreen.DocLogin.name) {
-                    var id by remember { mutableStateOf("") }
-                    var pwd by remember { mutableStateOf("") }
-                    var errorMessage by remember { mutableStateOf<String?>(null) }
+                    var id by rememberSaveable { mutableStateOf("") }
+                    var pwd by rememberSaveable { mutableStateOf("") }
+                    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
                     DoctorLoginScreen(
                         modifier = Modifier
@@ -326,13 +398,13 @@ fun MediConnectApp(
                 route = AppScreen.SignUpSystem.name
             ) {
                 composable(route = AppScreen.SignUpInfo.name) {
-                    var existPatient by remember { mutableStateOf<Boolean?>(signUpUiState.existPatient) }
-                    var ic by remember { mutableStateOf(signUpUiState.ic) }
-                    var name by remember { mutableStateOf(signUpUiState.name) }
-                    var email by remember { mutableStateOf(signUpUiState.email) }
-                    var phone by remember { mutableStateOf(signUpUiState.phone) }
-                    var read by remember { mutableStateOf(signUpUiState.read) }
-                    var errorMessage by remember { mutableStateOf<String?>(null) }
+                    var existPatient by rememberSaveable { mutableStateOf<Boolean?>(signUpUiState.existPatient) }
+                    var ic by rememberSaveable { mutableStateOf(signUpUiState.ic) }
+                    var name by rememberSaveable { mutableStateOf(signUpUiState.name) }
+                    var email by rememberSaveable { mutableStateOf(signUpUiState.email) }
+                    var phone by rememberSaveable { mutableStateOf(signUpUiState.phone) }
+                    var read by rememberSaveable { mutableStateOf(signUpUiState.read) }
+                    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
                     val icRegex = Regex("^\\d{12}$")
                     val passportRegex = Regex("^[A-PR-WYa-pr-wy][1-9]\\d{5,8}$")
@@ -401,9 +473,9 @@ fun MediConnectApp(
                 }
 
                 composable(route = AppScreen.SignUpPwd.name) {
-                    var newPwd by remember { mutableStateOf("") }
-                    var confirmPwd by remember { mutableStateOf("") }
-                    var errorMessage by remember { mutableStateOf<String?>(null) }
+                    var newPwd by rememberSaveable { mutableStateOf("") }
+                    var confirmPwd by rememberSaveable { mutableStateOf("") }
+                    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
 
                     SignUpPwdScreen(
@@ -497,9 +569,82 @@ fun MediConnectApp(
                         modifier = modifier
                             .fillMaxHeight(),
                         chooseBar = currentScreen,
-                        onAppointmentClick = {},
-                        onProfileClick = {},
-                        onMedicalReminderClick = {}
+                        onAppointmentClick = {navController.navigate(AppScreen.UserAppointment.name)},
+                        onProfileClick = {navController.navigate(AppScreen.UserProfile.name)},
+                        onMedicalReminderClick = {navController.navigate(AppScreen.UserMedicalReminder.name)}
+                    )
+                }
+
+                composable(route = AppScreen.UserProfile.name) {
+                    var logOutConfirm by rememberSaveable { mutableStateOf(false) }
+
+                    if (logOutConfirm) {
+                        AlertDialog(
+                            onDismissRequest = { logOutConfirm = false },
+                            title = { Text(text = "Confirm Logout") },
+                            text = { Text("Are you sure you want to logout?") },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    logOutConfirm = false
+                                    navController.navigate(AppScreen.LoginSystem.name)
+                                }) {
+                                    Text("Yes")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { logOutConfirm = false }) {
+                                    Text("No")
+                                }
+                            },
+                            properties = DialogProperties(dismissOnClickOutside = false)
+                        )
+                    }
+
+                    UserProfileScreen(
+                        modifier = modifier
+                            .fillMaxHeight(),
+                        currentUser = currentUser,
+                        currentScreen = currentScreen,
+                        onHomeClick = {navController.navigate(AppScreen.UserHome.name)},
+                        onAppointmentClick = {navController.navigate(AppScreen.UserAppointment.name)},
+                        onLogoutClick = {
+                            logOutConfirm = true
+                        }
+                    )
+                }
+
+                composable(route = AppScreen.UserAppointment.name) {
+                    UserAppointmentScreen(
+                        modifier = modifier
+                            .fillMaxHeight()
+                    )
+                }
+
+                composable(route = AppScreen.UserMedicalReminder.name) {
+                    var selectedDate by rememberSaveable { mutableStateOf(LocalDate.now()) }
+
+                    LaunchedEffect(selectedDate) {
+                        medicalViewModel.loadRemindersByDate(
+                            userIc = currentUser?.ic ?: "",
+                            date = selectedDate.toString()
+                        )
+                    }
+
+                    val sortedReminders = remember(reminders) {
+                        reminders.sortedBy {
+                            LocalTime.parse(it.time, DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault()))
+                        }
+                    }
+
+                    UserMedicReminderScreen(
+                        modifier = modifier
+                            .fillMaxHeight(),
+                        selectedDate = selectedDate,
+                        onChangeSelectedDate = {selectedDate = it},
+                        reminders = sortedReminders,
+                        currentScreen = currentScreen,
+                        onHomeClick = {navController.navigate(AppScreen.UserHome.name)},
+                        onProfileClick = {navController.navigate(AppScreen.UserProfile.name)}
                     )
                 }
             }
@@ -508,5 +653,6 @@ fun MediConnectApp(
         }
     }
 }
+
 
 

@@ -234,7 +234,14 @@ fun UserHomeScreen(
 
         UserChooseBar(
             chooseBar = chooseBar,
-            onTurnClick = {}
+            onTurnClick = {
+                if (it == AppScreen.UserProfile) {
+                    onProfileClick()
+                }
+                else {
+                    onAppointmentClick()
+                }
+            }
         )
 
     }
